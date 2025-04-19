@@ -19,14 +19,15 @@ import fitz  # PyMuPDF
 from fastapi import UploadFile
 from langchain_community.chat_models import ChatOpenAI
 # --- Configure Environment ---
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
 
+from src.core.config import settings
+
+OPENAI_API_KEY = settings.OPENAI_API_KEY
 # --- Qdrant Client ---
 qdrant_client = QdrantClient(
-    host=QDRANT_HOST,
-    port=QDRANT_PORT
+    url=settings.QDRANT_HOST,
+    # port=QDRANT_PORT
+    api_key=settings.QDRANT_API_KEY
 )
 existing = qdrant_client.get_collections()
 

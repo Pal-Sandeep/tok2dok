@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     JWT_ALGO: str = "HS256",
     extra: str = "allow"
     OPENAI_API_KEY: str
-
+    QDRANT_HOST: str
+    QDRANT_PORT: str
+    QDRANT_API_KEY: str
     class Config:
         env_file = ".env"
 
