@@ -12,7 +12,8 @@ from src.db import crud, database, models
 @lru_cache()
 def init_firebase():
     if not firebase_admin._apps:
-        cred = credentials.Certificate("src/firebase_service_account.json")  # download from Firebase Console
+        cred = credentials.Certificate("/etc/secrets/firebase_service_account.json")  # for deployment
+        # cred = credentials.Certificate("src/firebase_service_account.json")  # for locally windows
         initialize_app(cred)
 
 init_firebase()
