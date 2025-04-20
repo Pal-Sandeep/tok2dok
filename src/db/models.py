@@ -15,7 +15,7 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     email = Column(String(255), unique=True, nullable=False)
-    password_hash = Column(Text, nullable=False)
+    password_hash = Column(Text, nullable=True)
     uid = Column(String, unique=True, nullable=False)  # Firebase UID
     plan = Column(String(20), default="free")  # free, pro
     is_active = Column(Boolean, default=True)

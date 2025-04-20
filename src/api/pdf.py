@@ -1,4 +1,5 @@
 import logging
+import uuid
 # app/api/pdf.py
 
 from fastapi import Form, UploadFile, APIRouter, Depends, File, HTTPException
@@ -26,21 +27,41 @@ def chunk_text(text, max_length=500):
 
 
 @router.post("/upload_and_index/")
-async def upload_pdf(file: UploadFile, pdf_id: str = Form(...)):
+async def upload_pdf(
+    file: UploadFile,
+    pdf_id: str = Form(...),
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(get_current_user)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
     try:
         chunks = load_and_split_pdf(file, pdf_id)
         print(chunks, 'chunks...........')
         index_chunks_qdrant(chunks, pdf_id)
+        # Create PDF record in database
+        pdf_record = PDF(
+            id=uuid.uuid4(),
+            user_id=user.id,
+            filename=file.filename,
+            upload_path="/home/users/",
+            content=" ".join([chunk.page_content for chunk in chunks]),
+            chunk_count=len(chunks)
+        )
+        db.add(pdf_record)
+        db.commit()
+        db.refresh(pdf_record)
         return {"status": "indexed", "chunks": len(chunks)}
     except Exception as e:
+        db.rollback()
         logging.error(f"Error in upload_and_index: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/upload")
-async def upload_pdf_first(file: UploadFile = File(...), db: Session = Depends(database.get_db)):
+async def upload_pdf_first(
+    file: UploadFile = File(...), 
+    db: Session = Depends(database.get_db),
+    user: models.User = Depends(get_current_user)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 

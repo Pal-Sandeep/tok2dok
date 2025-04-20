@@ -1,28 +1,24 @@
-from uuid import uuid4
+import tempfile
 import fitz  # PyMuPDF
-import re
-from typing import List
 
-from langchain_core.documents import Document
-from langchain_community.document_loaders import PyPDFLoader
+from fastapi import UploadFile
+from typing import List
+from uuid import uuid4
+
+from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+# from langchain.vectorstores import FAISS
+from langchain_community.chains import PebbloRetrievalQA
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_core.documents import Document
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
+# from langchain_community.vectorstores import QdrantVectorStore
 # from langchain_community.vectorstores import FAISS
-from langchain.vectorstores import FAISS
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
-import os
-from qdrant_client.http.models import CollectionStatus
-from langchain.chains import RetrievalQA
-# from langchain_community.vectorstores import QdrantVectorStore
-from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client.http.models import Distance, VectorParams, CollectionStatus
 
-
-from langchain_community.chains import PebbloRetrievalQA
-import fitz  # PyMuPDF
-from fastapi import UploadFile
-from langchain_openai import ChatOpenAI
 # --- Configure Environment ---
 
 from src.core.config import settings
@@ -40,10 +36,6 @@ qdrant_client = QdrantClient(
 existing = qdrant_client.get_collections()
 
 COLLECTION_NAME = "pdf_chunks"
-# qdrant_client.create_collection(
-#     collection_name=COLLECTION_NAME,
-#     vectors_config=VectorParams(size=3072, distance=Distance.COSINE),
-# )
 
 # --- Ensure Collection Exists ---
 if COLLECTION_NAME not in [c.name for c in existing.collections]:
@@ -239,7 +231,6 @@ def query_pdf_chunks(pdf_id: str, question: str):
     # found_docs['sources'] = []
     # return found_docs, "something else"
     return result["result"], result.get("source_documents", [])
-import tempfile
 
 def load_and_split_pdf(file: UploadFile, pdf_id: int):
     # Save uploaded file to a temporary location
