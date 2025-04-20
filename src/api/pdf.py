@@ -31,6 +31,7 @@ async def upload_pdf(file: UploadFile, pdf_id: str = Form(...)):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
     try:
         chunks = load_and_split_pdf(file, pdf_id)
+        print(chunks, 'chunks...........')
         index_chunks_qdrant(chunks, pdf_id)
         return {"status": "indexed", "chunks": len(chunks)}
     except Exception as e:

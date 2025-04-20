@@ -123,6 +123,9 @@ google-api-core = "2.24.2"
 grpcio-status = "1.62.0"
 grpcio-tools = "1.71.0"
 langchain-openai = "^0.3.14"
+pypdf = "^5.4.0"
+langchain-qdrant = "^0.2.0"
+faiss-cpu = "1.10.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
